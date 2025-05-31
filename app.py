@@ -67,7 +67,7 @@ if "exhibition_stage" not in st.session_state:
 if st.session_state.index < len(st.session_state.selected_indices):
     artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
 
-    st.image(artwork['image_url'], use_container_width=True)
+    st.image(artwork['image_url'])
     st.subheader(artwork['title'])
     st.caption(f"Artist: {artwork.get('artist', 'Unknown')}")
 
