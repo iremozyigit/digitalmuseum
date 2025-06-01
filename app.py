@@ -27,7 +27,7 @@ client = gspread.authorize(credentials)
 
 # --- Test Google Sheets Connection ---
 try:
-    test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet1  # Replace with actual sheet name
+    test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet2  # Replace with actual sheet name
 
 
 except Exception as e:
