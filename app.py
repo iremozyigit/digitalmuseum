@@ -331,7 +331,7 @@ if "curated_exhibition" in st.session_state:
         st.session_state.written_to_sheets = True
 
     st.markdown("---")
-    st.subheader("Download Your Exhibition Card Here 👇)
+    st.subheader("Download Your Exhibition Card Here 👇")
 
 
 # --- At End: Handle Data Submission + Downloads + Final Message ---
