@@ -230,7 +230,7 @@ else:
                 col = col_left if i % 2 == 0 else col_right
                 with col:
                     st.markdown("**Select**")
-                    if st.checkbox("", key=f"select_{row.artwork_id}_{i}"):
+                    if st.checkbox("select", key=f"select_{row.artwork_id}_{i}", label_visibility="collapsed"):
                         selected_titles.append(row.artwork_id)
                     st.image(data[data['id'] == row.artwork_id].iloc[0]['image_url'], width=160)
                     st.caption(row.title)
