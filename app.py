@@ -56,6 +56,7 @@ else:
 # --- Setup Session State ---
 if "group" not in st.session_state:
     st.session_state.group = random.choice(["curator", "ai"])
+    print(f"Assigned group: {st.session_state.group}")
 if "start_times" not in st.session_state:
     st.session_state.start_times = {}
 if "viewed_items" not in st.session_state:
