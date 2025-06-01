@@ -16,6 +16,7 @@ from PIL import Image as PILImage
 import gspread
 from google.oauth2.service_account import Credentials
 import json
+import hashlib
 
 
     
@@ -56,7 +57,6 @@ else:
 # --- Setup Session State ---
 if "group" not in st.session_state:
     st.session_state.group = random.choice(["curator", "ai"])
-    print(f"Assigned group: {st.session_state.group}")
 if "start_times" not in st.session_state:
     st.session_state.start_times = {}
 if "viewed_items" not in st.session_state:
@@ -80,6 +80,12 @@ if "user_code" not in st.session_state:
     st.session_state.user_code = ""
 
 st.session_state.user_code = st.text_input("Enter your 4-letter participant code:", value=st.session_state.user_code)
+
+if "group" not in st.session_state and st.session_state.user_code:
+    hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
+    group_value = int(hash_digest, 16) % 2
+    st.session_state.group = "ai" if group_value == 0 else "curator"
+    st.info(f"🧪 You have been assigned to the **{st.session_state.group}** group.")  # ✅ Debug display
 # --- Main App Logic ---
 if st.session_state.index < len(st.session_state.selected_indices):
     artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
