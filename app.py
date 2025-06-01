@@ -32,6 +32,17 @@ try:
 except Exception as e:
     st.error(f"❌ Failed to connect to Google Sheets: {e}")
 
+
+# --- Write to Google Sheets Function ---
+def write_to_google_sheets(sheet, data_dict):
+    try:
+        row = [data_dict.get(col, "") for col in sheet.row_values(1)]  # match columns by header row
+        sheet.append_row(row)
+        print("✅ Data written to Google Sheets.")
+    except Exception as e:
+        st.error(f"Failed to write data to Google Sheets: {e}")
+
+
 # --- Load Data ---
 base_path = os.path.dirname(__file__)
 file_path = os.path.join(base_path, 'data', 'real_museum_metadata_with_ai.json')
@@ -61,7 +72,13 @@ if "preferences" not in st.session_state:
     st.session_state.preferences = {}
 if "exhibition_stage" not in st.session_state:
     st.session_state.exhibition_stage = "select_artworks"
+if "written_to_sheets" not in st.session_state:
+    st.session_state.written_to_sheets = False
+# --- Ask for User Code to Identify Later ---
+if "user_code" not in st.session_state:
+    st.session_state.user_code = ""
 
+st.session_state.user_code = st.text_input("Enter your 4-letter participant code:", value=st.session_state.user_code)
 # --- Main App Logic ---
 if st.session_state.index < len(st.session_state.selected_indices):
     artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
@@ -91,11 +108,6 @@ if st.session_state.index < len(st.session_state.selected_indices):
         st.rerun()
 
 else:
-    st.title("Thank you for participating!")
-    st.write("You have completed the main session.")
-    st.write("Please continue to the final survey here:")
-    st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
-
     st.markdown("---")
     st.subheader("Curator Mode: Build Your Own Exhibition")
 
@@ -136,7 +148,6 @@ else:
                 ai_desc = artwork_row['ai_story'] or "No AI-generated description available."
 
                 desc_key = f"description_order_{artwork_id}"
-
                 if desc_key not in st.session_state:
                     descriptions = [("A", curator_desc, "curator"), ("B", ai_desc, "ai")]
                     random.shuffle(descriptions)
@@ -184,10 +195,7 @@ else:
                     }
                     st.success("Your exhibition has been saved!")
 
-    else:
-        st.info("You chose to skip Curator Mode. Thank you for participating!")
-
-    # --- PDF Generation Function ---
+  # --- PDF Generation Function ---
     def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
         import tempfile
         buffer = io.BytesIO()
@@ -278,45 +286,93 @@ else:
         c.save()
         buffer.seek(0)
         return buffer
+if "curated_exhibition" in st.session_state:
+    exhibition = st.session_state.curated_exhibition  # ✅ define this first!
 
-    if "curated_exhibition" in st.session_state:
-        st.markdown("---")
-        st.subheader("Download Your Exhibition Card (PDF)")
-
-        exhibition = st.session_state.curated_exhibition
-        pdf_buffer = generate_exhibition_pdf(
-            title=exhibition['exhibition_title'],
-            description=exhibition['exhibition_description'],
-            artwork_ids=exhibition['selected_ids'],
-            data=data,
-            preferences=exhibition['preferences']
-        )
-
-        st.download_button(
-            label="Download Exhibition Card (PDF)",
-            data=pdf_buffer,
-            file_name="my_exhibition_card.pdf",
-            mime="application/pdf"
-        )
-
-        df_views = pd.DataFrame(st.session_state.viewed_items)
-        df_summary = pd.DataFrame([{
+    if "written_to_sheets" not in st.session_state:
+        combined_data = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "group": st.session_state.group,
             "exhibition_title": exhibition.get("exhibition_title", ""),
             "exhibition_description": exhibition.get("exhibition_description", ""),
             "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
-            "preferences": json.dumps(exhibition.get("preferences", {}), indent=2)
-        }])
+            "preferences": json.dumps(exhibition.get("preferences", {})),
+            "viewed_items": json.dumps(st.session_state.viewed_items)
+        }
 
-        st.download_button(
-            label="Download Artwork Views (CSV)",
-            data=df_views.to_csv(index=False).encode('utf-8'),
-            file_name="artwork_views.csv",
-            mime="text/csv"
-        )
+        write_to_google_sheets(test_sheet, combined_data)
+        st.session_state.written_to_sheets = True
 
-        st.download_button(
-            label="Download Exhibition Summary (CSV)",
-            data=df_summary.to_csv(index=False).encode('utf-8'),
-            file_name="exhibition_summary.csv",
-            mime="text/csv"
-        )
+    st.markdown("---")
+    st.subheader("Download Your Exhibition Card (PDF)")
+
+
+# --- At End: Handle Data Submission + Downloads + Final Message ---
+if not st.session_state.written_to_sheets:
+    combined_data = {
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "user_code": st.session_state.user_code,
+        "group": st.session_state.group,
+        "viewed_items": json.dumps(st.session_state.viewed_items),
+        
+    }
+
+    if "curated_exhibition" in st.session_state:
+        exhibition = st.session_state.curated_exhibition
+        combined_data["exhibition_title"] = exhibition.get("exhibition_title", "")
+        combined_data["exhibition_description"] = exhibition.get("exhibition_description", "")
+        combined_data["selected_ids"] = ", ".join(exhibition.get("selected_ids", []))
+        combined_data["preferences"] = json.dumps(exhibition.get("preferences", {}))
+
+    write_to_google_sheets(test_sheet, combined_data)
+    st.session_state.written_to_sheets = True
+
+# --- Downloads if Exhibition Was Created ---
+if "curated_exhibition" in st.session_state:
+    exhibition = st.session_state.curated_exhibition
+
+    st.markdown("---")
+    st.subheader("Download Your Exhibition Card (PDF)")
+    pdf_buffer = generate_exhibition_pdf(
+        title=exhibition['exhibition_title'],
+        description=exhibition['exhibition_description'],
+        artwork_ids=exhibition['selected_ids'],
+        data=data,
+        preferences=exhibition['preferences']
+    )
+
+    st.download_button(
+        label="Download Exhibition Card (PDF)",
+        data=pdf_buffer,
+        file_name="my_exhibition_card.pdf",
+        mime="application/pdf"
+    )
+
+    df_views = pd.DataFrame(st.session_state.viewed_items)
+    df_summary = pd.DataFrame([{
+        "exhibition_title": exhibition.get("exhibition_title", ""),
+        "exhibition_description": exhibition.get("exhibition_description", ""),
+        "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
+        "preferences": json.dumps(exhibition.get("preferences", {}), indent=2)
+    }])
+
+    st.download_button(
+        label="Download Artwork Views (CSV)",
+        data=df_views.to_csv(index=False).encode('utf-8'),
+        file_name="artwork_views.csv",
+        mime="text/csv"
+    )
+
+    st.download_button(
+        label="Download Exhibition Summary (CSV)",
+        data=df_summary.to_csv(index=False).encode('utf-8'),
+        file_name="exhibition_summary.csv",
+        mime="text/csv"
+    )
+
+# --- Final "Thank You" and Survey Link ---
+st.markdown("---")
+st.title("Thank you for participating!")
+st.write("You have completed the session.")
+st.write("Please continue to the final survey here:")
+st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
