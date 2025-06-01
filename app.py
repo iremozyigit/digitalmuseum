@@ -195,6 +195,24 @@ else:
                     }
                     st.success("Your exhibition has been saved!")
 
+                    # ✅ Thank you message only after saving curation
+                    st.markdown("---")
+                    st.title("Thank you for participating!")
+                    st.write("You have completed the session.")
+                    st.write("Please continue to the final survey here:")
+                    st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
+
+    else:
+        st.info("You chose to skip Curator Mode.")
+
+        # ✅ Show thank you message if user chooses to skip
+        st.markdown("---")
+        st.title("Thank you for participating!")
+        st.write("You have completed the session.")
+        st.write("Please continue to the final survey here:")
+        st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
+
+
   # --- PDF Generation Function ---
     def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
         import tempfile
