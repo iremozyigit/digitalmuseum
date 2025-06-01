@@ -388,9 +388,3 @@ if "curated_exhibition" in st.session_state:
         mime="text/csv"
     )
 
-# --- Final "Thank You" and Survey Link ---
-st.markdown("---")
-st.title("Thank you for participating!")
-st.write("You have completed the session.")
-st.write("Please continue to the final survey here:")
-st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
