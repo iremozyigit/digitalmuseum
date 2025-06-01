@@ -320,22 +320,31 @@ if not st.session_state.written_to_sheets:
     if st.session_state.user_code.strip() == "":
         st.warning("⚠️ Please enter your participant code to save your session.")
     else:
-        combined_data = {
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "user_code": st.session_state.user_code,
-            "group": st.session_state.group,
-            "viewed_items": json.dumps(st.session_state.viewed_items),
-        }
+        df_views = pd.DataFrame(st.session_state.viewed_items)
+        df_views["user_code"] = st.session_state.user_code
+        df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
 
         if "curated_exhibition" in st.session_state:
             exhibition = st.session_state.curated_exhibition
-            combined_data["exhibition_title"] = exhibition.get("exhibition_title", "")
-            combined_data["exhibition_description"] = exhibition.get("exhibition_description", "")
-            combined_data["selected_ids"] = ", ".join(exhibition.get("selected_ids", []))
-            combined_data["preferences"] = json.dumps(exhibition.get("preferences", {}))
+            df_summary = pd.DataFrame([{
+                "exhibition_title": exhibition.get("exhibition_title", ""),
+                "exhibition_description": exhibition.get("exhibition_description", ""),
+                "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
+                "preferences": json.dumps(exhibition.get("preferences", {})),
+                "user_code": st.session_state.user_code,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            }])
+        else:
+            df_summary = pd.DataFrame(columns=["exhibition_title", "exhibition_description", "selected_ids", "preferences", "user_code", "timestamp"])
 
-        write_to_google_sheets(test_sheet, combined_data, sheet_headers)
-        st.session_state.written_to_sheets = True
+        try:
+            views_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Artwork Views")
+            summary_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Exhibition Summary")
+            write_dataframe_to_sheets(views_sheet, df_views)
+            write_dataframe_to_sheets(summary_sheet, df_summary)
+            st.session_state.written_to_sheets = True
+        except Exception as e:
+            st.error(f"❌ Failed to write data to Google Sheets: {e}")
 
 # --- Downloads if Exhibition Was Created ---
 if "curated_exhibition" in st.session_state:
