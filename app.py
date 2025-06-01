@@ -222,7 +222,116 @@ else:
         st.write("Please continue to the final survey here:")
         st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
 
+  # --- PDF Generation Function ---
+    def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
+        import tempfile
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        width, height = letter
 
+        margin = 1 * inch
+        text_width = width - 2 * margin
+        image_width = width - 2 * margin
+        image_height = 4 * inch
+
+        # Cover Page
+        c.setFillColorRGB(1, 1, 1)
+        c.rect(0, 0, width, height, stroke=0, fill=1)
+        c.setFont("Helvetica-Bold", 28)
+        c.setFillColor(colors.HexColor("#2c3e50"))
+        c.drawCentredString(width / 2, height - 2 * inch, title)
+
+        c.setFont("Helvetica", 14)
+        c.setFillColor(colors.HexColor("#333333"))
+        wrapped_intro = wrap(description, width=80)
+        text = c.beginText(margin, height - 2.5 * inch)
+        text.setLeading(18)
+        for line in wrapped_intro:
+            text.textLine(line)
+        c.drawText(text)
+        c.showPage()
+
+        for aid in artwork_ids:
+            row = data[data['id'] == aid].iloc[0]
+            artwork_title = row['title']
+            theme = row.get('theme', 'Unknown')
+            img_url = row['image_url']
+
+            pref = preferences.get(aid)
+            if not pref:
+                continue
+
+            chosen = pref['user_choice']
+            chosen_desc = row['description'] if pref['description_A_source'] == 'curator' and chosen == 'Description A' else \
+                           row['ai_story'] if pref['description_A_source'] == 'ai' and chosen == 'Description A' else \
+                           row['description'] if pref['description_B_source'] == 'curator' else row['ai_story']
+
+            c.setFillColorRGB(1, 1, 1)
+            c.rect(0, 0, width, height, stroke=0, fill=1)
+
+            c.setFont("Helvetica-Bold", 18)
+            c.setFillColor(colors.HexColor("#2c3e50"))
+            c.drawCentredString(width / 2, height - 1 * inch, artwork_title)
+
+            c.setFont("Helvetica", 12)
+            c.setFillColor(colors.HexColor("#7f8c8d"))
+            c.drawCentredString(width / 2, height - 1.3 * inch, f"Theme: {theme}")
+
+            y = height - 2 * inch
+
+            try:
+                response = requests.get(img_url, stream=True)
+                if response.status_code == 200:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+                        tmp_file.write(response.content)
+                        tmp_file_path = tmp_file.name
+                    c.drawImage(tmp_file_path, margin, y - image_height, width=image_width, height=image_height, preserveAspectRatio=True, anchor='n', mask='auto')
+                    os.unlink(tmp_file_path)
+                    y -= image_height + 0.3 * inch
+                else:
+                    raise Exception("Image fetch failed")
+            except:
+                c.setFont("Helvetica", 10)
+                c.setFillColor(colors.red)
+                c.drawCentredString(width / 2, y, "[Image could not be loaded]")
+                y -= 0.4 * inch
+
+            c.setFont("Helvetica", 11)
+            c.setFillColor(colors.black)
+            wrapped_desc = []
+            for paragraph in chosen_desc.split("\n"):
+                wrapped_desc.extend(wrap(paragraph, width=100))
+
+            text = c.beginText(margin, y)
+            text.setLeading(14)
+            for line in wrapped_desc:
+                text.textLine(line)
+            c.drawText(text)
+
+            c.showPage()
+
+        c.save()
+        buffer.seek(0)
+        return buffer
+if "curated_exhibition" in st.session_state:
+    exhibition = st.session_state.curated_exhibition  # ✅ define this first!
+
+    if "written_to_sheets" not in st.session_state:
+        combined_data = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "group": st.session_state.group,
+            "exhibition_title": exhibition.get("exhibition_title", ""),
+            "exhibition_description": exhibition.get("exhibition_description", ""),
+            "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
+            "preferences": json.dumps(exhibition.get("preferences", {})),
+            "viewed_items": json.dumps(st.session_state.viewed_items)
+        }
+
+        write_to_google_sheets(test_sheet, combined_data)
+        st.session_state.written_to_sheets = True
+
+    st.markdown("---")
+    st.subheader("Download Your Exhibition Card (PDF)")
 
 
 # --- At End: Handle Data Submission + Downloads + Final Message ---
