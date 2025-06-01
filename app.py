@@ -359,7 +359,7 @@ if "curated_exhibition" in st.session_state:
     exhibition = st.session_state.curated_exhibition
 
     st.markdown("---")
-    st.subheader("Download Your Exhibition Card (PDF)")
+    
     pdf_buffer = generate_exhibition_pdf(
         title=exhibition['exhibition_title'],
         description=exhibition['exhibition_description'],
