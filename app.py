@@ -32,14 +32,13 @@ except Exception as e:
     st.error(f"❌ Failed to connect to Google Sheets: {e}")
 
 # --- Write to Google Sheets Function ---
-def write_to_google_sheets(sheet, data_dict):
+def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
     try:
-        row = [data_dict.get(col, "") for col in sheet.row_values(1)]  # match columns by header row
-        sheet.append_row(row)
-        print("✅ Data written to Google Sheets.")
-        st.session_state.written_to_sheets = True
+        rows = df.astype(str).values.tolist()
+        sheet.append_rows(rows, value_input_option="USER_ENTERED")
+        print("✅ DataFrame written to Google Sheets.")
     except Exception as e:
-        st.error(f"Failed to write data to Google Sheets: {e}")
+        st.error(f"Failed to write DataFrame to Google Sheets: {e}")
 
 # --- Load Data ---
 base_path = os.path.dirname(__file__)
@@ -341,6 +340,23 @@ if not st.session_state.written_to_sheets:
 # --- Downloads if Exhibition Was Created ---
 if "curated_exhibition" in st.session_state:
     exhibition = st.session_state.curated_exhibition
+
+    
+    df_views["user_code"] = st.session_state.user_code
+    df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+    df_summary["user_code"] = st.session_state.user_code
+    df_summary["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+    # Write to their respective sheets
+    try:
+        views_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Artwork Views")
+        summary_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Exhibition Summary")
+
+        write_dataframe_to_sheets(views_sheet, df_views)
+        write_dataframe_to_sheets(summary_sheet, df_summary)
+    except Exception as e:
+        st.error(f"Failed to open target sheets: {e}")
 
     st.markdown("---")
     st.subheader("Download Your Exhibition Card (PDF)")
