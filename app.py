@@ -18,8 +18,6 @@ from google.oauth2.service_account import Credentials
 import json
 import hashlib
 
-
-    
 # --- Set up connection to Google Sheets ---
 scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
 credentials_dict = st.secrets["gspread"]
@@ -29,10 +27,9 @@ client = gspread.authorize(credentials)
 # --- Test Google Sheets Connection ---
 try:
     test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet1  # Replace with actual sheet name
-    st.success("✅ Successfully connected to Google Sheets and wrote a test row.")
+    st.success("✅ Connected to Google Sheets.")
 except Exception as e:
     st.error(f"❌ Failed to connect to Google Sheets: {e}")
-
 
 # --- Write to Google Sheets Function ---
 def write_to_google_sheets(sheet, data_dict):
@@ -40,9 +37,9 @@ def write_to_google_sheets(sheet, data_dict):
         row = [data_dict.get(col, "") for col in sheet.row_values(1)]  # match columns by header row
         sheet.append_row(row)
         print("✅ Data written to Google Sheets.")
+        st.session_state.written_to_sheets = True
     except Exception as e:
         st.error(f"Failed to write data to Google Sheets: {e}")
-
 
 # --- Load Data ---
 base_path = os.path.dirname(__file__)
@@ -55,8 +52,6 @@ else:
     st.stop()
 
 # --- Setup Session State ---
-if "group" not in st.session_state:
-    st.session_state.group = random.choice(["curator", "ai"])
 if "start_times" not in st.session_state:
     st.session_state.start_times = {}
 if "viewed_items" not in st.session_state:
@@ -75,17 +70,25 @@ if "exhibition_stage" not in st.session_state:
     st.session_state.exhibition_stage = "select_artworks"
 if "written_to_sheets" not in st.session_state:
     st.session_state.written_to_sheets = False
-# --- Ask for User Code to Identify Later ---
 if "user_code" not in st.session_state:
     st.session_state.user_code = ""
 
-st.session_state.user_code = st.text_input("Enter your 4-letter participant code:", value=st.session_state.user_code)
+# --- Ask for User Code to Identify Later ---
+prev_code = st.session_state.user_code
+st.session_state.user_code = st.text_input("Enter your 4-letter participant code:", value=prev_code)
 
-if "group" not in st.session_state and st.session_state.user_code:
+if st.session_state.user_code and len(st.session_state.user_code) != 4:
+    st.warning("Please enter a 4-letter participant code.")
+
+# --- Assign group deterministically ---
+if st.session_state.user_code:
     hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
     group_value = int(hash_digest, 16) % 2
     st.session_state.group = "ai" if group_value == 0 else "curator"
-    st.info(f"🧪 You have been assigned to the **{st.session_state.group}** group.")  # ✅ Debug display
+    st.info(f"🧪 You have been assigned to the **{st.session_state.group}** group.")
+else:
+    st.session_state.group = "curator"
+    st.warning("No user code provided — defaulting to 'curator' group.")
 # --- Main App Logic ---
 if st.session_state.index < len(st.session_state.selected_indices):
     artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
@@ -220,116 +223,6 @@ else:
         st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
 
 
-  # --- PDF Generation Function ---
-    def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
-        import tempfile
-        buffer = io.BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
-
-        margin = 1 * inch
-        text_width = width - 2 * margin
-        image_width = width - 2 * margin
-        image_height = 4 * inch
-
-        # Cover Page
-        c.setFillColorRGB(1, 1, 1)
-        c.rect(0, 0, width, height, stroke=0, fill=1)
-        c.setFont("Helvetica-Bold", 28)
-        c.setFillColor(colors.HexColor("#2c3e50"))
-        c.drawCentredString(width / 2, height - 2 * inch, title)
-
-        c.setFont("Helvetica", 14)
-        c.setFillColor(colors.HexColor("#333333"))
-        wrapped_intro = wrap(description, width=80)
-        text = c.beginText(margin, height - 2.5 * inch)
-        text.setLeading(18)
-        for line in wrapped_intro:
-            text.textLine(line)
-        c.drawText(text)
-        c.showPage()
-
-        for aid in artwork_ids:
-            row = data[data['id'] == aid].iloc[0]
-            artwork_title = row['title']
-            theme = row.get('theme', 'Unknown')
-            img_url = row['image_url']
-
-            pref = preferences.get(aid)
-            if not pref:
-                continue
-
-            chosen = pref['user_choice']
-            chosen_desc = row['description'] if pref['description_A_source'] == 'curator' and chosen == 'Description A' else \
-                           row['ai_story'] if pref['description_A_source'] == 'ai' and chosen == 'Description A' else \
-                           row['description'] if pref['description_B_source'] == 'curator' else row['ai_story']
-
-            c.setFillColorRGB(1, 1, 1)
-            c.rect(0, 0, width, height, stroke=0, fill=1)
-
-            c.setFont("Helvetica-Bold", 18)
-            c.setFillColor(colors.HexColor("#2c3e50"))
-            c.drawCentredString(width / 2, height - 1 * inch, artwork_title)
-
-            c.setFont("Helvetica", 12)
-            c.setFillColor(colors.HexColor("#7f8c8d"))
-            c.drawCentredString(width / 2, height - 1.3 * inch, f"Theme: {theme}")
-
-            y = height - 2 * inch
-
-            try:
-                response = requests.get(img_url, stream=True)
-                if response.status_code == 200:
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-                        tmp_file.write(response.content)
-                        tmp_file_path = tmp_file.name
-                    c.drawImage(tmp_file_path, margin, y - image_height, width=image_width, height=image_height, preserveAspectRatio=True, anchor='n', mask='auto')
-                    os.unlink(tmp_file_path)
-                    y -= image_height + 0.3 * inch
-                else:
-                    raise Exception("Image fetch failed")
-            except:
-                c.setFont("Helvetica", 10)
-                c.setFillColor(colors.red)
-                c.drawCentredString(width / 2, y, "[Image could not be loaded]")
-                y -= 0.4 * inch
-
-            c.setFont("Helvetica", 11)
-            c.setFillColor(colors.black)
-            wrapped_desc = []
-            for paragraph in chosen_desc.split("\n"):
-                wrapped_desc.extend(wrap(paragraph, width=100))
-
-            text = c.beginText(margin, y)
-            text.setLeading(14)
-            for line in wrapped_desc:
-                text.textLine(line)
-            c.drawText(text)
-
-            c.showPage()
-
-        c.save()
-        buffer.seek(0)
-        return buffer
-if "curated_exhibition" in st.session_state:
-    exhibition = st.session_state.curated_exhibition  # ✅ define this first!
-
-    if "written_to_sheets" not in st.session_state:
-        combined_data = {
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "group": st.session_state.group,
-            "exhibition_title": exhibition.get("exhibition_title", ""),
-            "exhibition_description": exhibition.get("exhibition_description", ""),
-            "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
-            "preferences": json.dumps(exhibition.get("preferences", {})),
-            "viewed_items": json.dumps(st.session_state.viewed_items)
-        }
-
-        write_to_google_sheets(test_sheet, combined_data)
-        st.session_state.written_to_sheets = True
-
-    st.markdown("---")
-    st.subheader("Download Your Exhibition Card (PDF)")
 
 
 # --- At End: Handle Data Submission + Downloads + Final Message ---
@@ -394,4 +287,6 @@ if "curated_exhibition" in st.session_state:
         file_name="exhibition_summary.csv",
         mime="text/csv"
     )
+
+
 
