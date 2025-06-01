@@ -27,7 +27,8 @@ client = gspread.authorize(credentials)
 
 # --- Test Google Sheets Connection ---
 try:
-    test_sheet = client.open("Digital Museum Streamlit Data Sheet").get_worksheet(0)
+    test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet1
+    
 except Exception as e:
     st.error(f"❌ Failed to connect to Google Sheets: {e}")
 
