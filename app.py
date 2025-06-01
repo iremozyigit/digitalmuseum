@@ -27,11 +27,10 @@ client = gspread.authorize(credentials)
 
 # --- Test Google Sheets Connection ---
 try:
-    test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet2  # Replace with actual sheet name
-
-
+    test_sheet = client.open("Digital Museum Streamlit Data Sheet").get_worksheet(0)
 except Exception as e:
     st.error(f"❌ Failed to connect to Google Sheets: {e}")
+
 
 # --- Load Data ---
 base_path = os.path.dirname(__file__)
@@ -95,6 +94,17 @@ else:
     st.title("Thank you for participating!")
     st.write("You have completed the main session.")
     st.write("Please continue to the final survey here:")
+
+    # --- Write interaction data to Google Sheets ---
+    try:
+        sheet = client.open("Digital Museum Streamlit Data Sheet").sheet1  # Make sure the sheet name matches exactly
+        df_views = pd.DataFrame(st.session_state.viewed_items)
+        if not df_views.empty:
+            sheet.append_rows([df_views.columns.tolist()] + df_views.values.tolist())
+            st.success("✅ Your interaction data has been saved to Google Sheets.")
+    except Exception as e:
+        st.error(f"❌ Failed to save data to Google Sheets: {e}")
+
     st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
 
     st.markdown("---")
