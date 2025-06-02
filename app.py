@@ -320,31 +320,43 @@ if not st.session_state.written_to_sheets:
     if st.session_state.user_code.strip() == "":
         st.warning("⚠️ Please enter your participant code to save your session.")
     else:
+        # --- Create df_views from session state ---
         df_views = pd.DataFrame(st.session_state.viewed_items)
         df_views["user_code"] = st.session_state.user_code
         df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
 
+        # --- Create df_summary if curation exists ---
         if "curated_exhibition" in st.session_state:
             exhibition = st.session_state.curated_exhibition
             df_summary = pd.DataFrame([{
                 "exhibition_title": exhibition.get("exhibition_title", ""),
                 "exhibition_description": exhibition.get("exhibition_description", ""),
                 "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
-                "preferences": json.dumps(exhibition.get("preferences", {})),
+                "preferences": json.dumps(exhibition.get("preferences", {}), ensure_ascii=False),
                 "user_code": st.session_state.user_code,
                 "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
             }])
         else:
-            df_summary = pd.DataFrame(columns=["exhibition_title", "exhibition_description", "selected_ids", "preferences", "user_code", "timestamp"])
+            df_summary = pd.DataFrame(columns=[
+                "exhibition_title", "exhibition_description", "selected_ids",
+                "preferences", "user_code", "timestamp"
+            ])
 
+        # --- Write both to their sheets ---
         try:
             views_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Artwork Views")
             summary_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Exhibition Summary")
+
             write_dataframe_to_sheets(views_sheet, df_views)
-            write_dataframe_to_sheets(summary_sheet, df_summary)
+            if not df_summary.empty:
+                write_dataframe_to_sheets(summary_sheet, df_summary)
+
             st.session_state.written_to_sheets = True
+            st.success("✅ Data written successfully to Google Sheets.")
         except Exception as e:
             st.error(f"❌ Failed to write data to Google Sheets: {e}")
+            st.write("🧪 df_views preview:", df_views)
+            st.write("🧪 df_summary preview:", df_summary)
 
 # --- Downloads if Exhibition Was Created ---
 if "curated_exhibition" in st.session_state:
