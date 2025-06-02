@@ -262,7 +262,7 @@ def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
 
 # --- Main App Logic ---
 if st.session_state.user_code and len(st.session_state.user_code) == 4:
-    st.write(f"**Group:** {st.session_state.group}")
+    
     
     if st.session_state.index < len(st.session_state.selected_indices):
         artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
