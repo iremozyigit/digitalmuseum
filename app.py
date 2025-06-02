@@ -39,7 +39,7 @@ client = init_google_sheets()
 if client:
     try:
         test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet1
-        st.success("✅ Connected to Google Sheets.")
+        
     except Exception as e:
         st.error(f"❌ Failed to connect to Google Sheets: {e}")
         client = None
@@ -52,7 +52,7 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
             st.warning("DataFrame is empty, skipping write operation.")
             return False
         
-        st.info(f"Attempting to write {len(df)} rows to sheet: {sheet.title}")
+        
         
         # Convert DataFrame to list of lists, handling NaN values
         rows = df.fillna('').astype(str).values.tolist()
@@ -84,7 +84,7 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
                 st.error(f"Row data: {row}")
                 raise
         
-        st.success("✅ DataFrame written to Google Sheets.")
+        st.success("✅ Success.")
         return True
         
     except Exception as e:
