@@ -80,15 +80,14 @@ if st.session_state.user_code and len(st.session_state.user_code) != 4:
     st.warning("Please enter a 4-letter participant code.")
 
 # --- Assign group deterministically ---
-if st.session_state.user_code:
-    hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
-    group_value = int(hash_digest, 16) % 2
-    st.session_state.group = "ai" if group_value == 0 else "curator"
-    st.info(f"🧪 You have been assigned to the **{st.session_state.group}** group.")
-else:
-    st.session_state.group = "curator"
-    st.warning("No user code provided — defaulting to 'curator' group.")
-
+if "group" not in st.session_state:
+    if st.session_state.user_code:
+        hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
+        group_value = int(hash_digest, 16) % 2
+        st.session_state.group = "ai" if group_value == 0 else "curator"
+    else:
+        st.session_state.group = "curator"
+    
   # --- PDF Generation Function ---
     def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
         import tempfile
@@ -181,6 +180,7 @@ else:
         buffer.seek(0)
         return buffer
 # --- Main App Logic ---
+# --- Main App Logic ---
 if st.session_state.index < len(st.session_state.selected_indices):
     artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
 
@@ -212,11 +212,11 @@ else:
     st.markdown("---")
     st.subheader("Curator Mode: Build Your Own Exhibition")
 
-    if "curator_choice" not in st.session_state:
-        st.session_state.curator_choice = None
-
-    proceed = st.radio("Choose an option:", ["Yes, I want to build an exhibition", "No, I want to skip this step"], key="curator_choice")
-    st.session_state.curator_choice = proceed
+    proceed = st.radio(
+        "Choose an option:",
+        ["Yes, I want to build an exhibition", "No, I want to skip this step"],
+        key="curator_choice"
+    )
 
     if proceed == "Yes, I want to build an exhibition":
         viewed_df = pd.DataFrame(st.session_state.viewed_items)
