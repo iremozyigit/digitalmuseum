@@ -457,5 +457,6 @@ if "curated_exhibition" in st.session_state:
         mime="text/csv"
     )
 
-else:
+# --- Show user code prompt if not provided ---
+if not st.session_state.user_code or len(st.session_state.user_code) != 4:
     st.write("Please enter your 4-letter participant code to continue.")
