@@ -52,22 +52,46 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
             st.warning("DataFrame is empty, skipping write operation.")
             return False
         
+        st.info(f"Attempting to write {len(df)} rows to sheet: {sheet.title}")
+        
         # Convert DataFrame to list of lists, handling NaN values
         rows = df.fillna('').astype(str).values.tolist()
         
+        # Check if sheet is empty using a more robust method
+        try:
+            # Try to get all values first
+            all_values = sheet.get_all_values()
+            sheet_is_empty = len(all_values) == 0 or (len(all_values) == 1 and all(cell == '' for cell in all_values[0]))
+            st.info(f"Sheet has {len(all_values)} rows, is_empty: {sheet_is_empty}")
+        except Exception as e:
+            # If get_all_values fails, assume sheet is empty
+            st.warning(f"Could not check sheet contents, assuming empty: {e}")
+            sheet_is_empty = True
+        
         # Add headers if sheet is empty
-        if len(sheet.get_all_records()) == 0:
+        if sheet_is_empty:
             headers = df.columns.tolist()
+            st.info(f"Adding headers: {headers}")
             sheet.append_row(headers, value_input_option="USER_ENTERED")
         
         # Append data rows
-        sheet.append_rows(rows, value_input_option="USER_ENTERED")
+        st.info(f"Appending {len(rows)} data rows...")
+        for i, row in enumerate(rows):
+            try:
+                sheet.append_row(row, value_input_option="USER_ENTERED")
+            except Exception as e:
+                st.error(f"Failed to append row {i+1}: {e}")
+                st.error(f"Row data: {row}")
+                raise
+        
         st.success("✅ DataFrame written to Google Sheets.")
         return True
+        
     except Exception as e:
         st.error(f"❌ Failed to write DataFrame to Google Sheets: {e}")
+        st.error(f"DataFrame shape: {df.shape}")
+        st.error(f"DataFrame columns: {list(df.columns)}")
         return False
-
 # --- Load Data ---
 @st.cache_data
 def load_museum_data():
