@@ -83,6 +83,50 @@ def load_museum_data():
 
 data = load_museum_data()
 
+# --- Data Writing Function ---
+def write_data_to_sheets():
+    """Write data to Google Sheets"""
+    if not client:
+        st.error("Google Sheets client not available")
+        return
+    
+    try:
+        # Create df_views from session state
+        df_views = pd.DataFrame(st.session_state.viewed_items)
+        if not df_views.empty:
+            df_views["user_code"] = st.session_state.user_code
+            df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        # Create df_summary if curation exists
+        if "curated_exhibition" in st.session_state:
+            exhibition = st.session_state.curated_exhibition
+            df_summary = pd.DataFrame([{
+                "exhibition_title": exhibition.get("exhibition_title", ""),
+                "exhibition_description": exhibition.get("exhibition_description", ""),
+                "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
+                "preferences": json.dumps(exhibition.get("preferences", {}), ensure_ascii=False),
+                "user_code": st.session_state.user_code,
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            }])
+        else:
+            df_summary = pd.DataFrame()
+
+        # Write to sheets
+        views_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Artwork Views")
+        summary_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Exhibition Summary")
+
+        success = True
+        if not df_views.empty:
+            success &= write_dataframe_to_sheets(views_sheet, df_views)
+        if not df_summary.empty:
+            success &= write_dataframe_to_sheets(summary_sheet, df_summary)
+
+        if success:
+            st.session_state.written_to_sheets = True
+
+    except Exception as e:
+        st.error(f"❌ Failed to write data to Google Sheets: {e}")
+
 # --- Setup Session State ---
 def initialize_session_state():
     """Initialize all session state variables"""
@@ -360,50 +404,6 @@ if st.session_state.user_code and len(st.session_state.user_code) == 4:
             st.write("You have completed the session.")
             st.write("Please continue to the final survey here:")
             st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
-
-# --- Data Writing Function ---
-def write_data_to_sheets():
-    """Write data to Google Sheets"""
-    if not client:
-        st.error("Google Sheets client not available")
-        return
-    
-    try:
-        # Create df_views from session state
-        df_views = pd.DataFrame(st.session_state.viewed_items)
-        if not df_views.empty:
-            df_views["user_code"] = st.session_state.user_code
-            df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-
-        # Create df_summary if curation exists
-        if "curated_exhibition" in st.session_state:
-            exhibition = st.session_state.curated_exhibition
-            df_summary = pd.DataFrame([{
-                "exhibition_title": exhibition.get("exhibition_title", ""),
-                "exhibition_description": exhibition.get("exhibition_description", ""),
-                "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
-                "preferences": json.dumps(exhibition.get("preferences", {}), ensure_ascii=False),
-                "user_code": st.session_state.user_code,
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-            }])
-        else:
-            df_summary = pd.DataFrame()
-
-        # Write to sheets
-        views_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Artwork Views")
-        summary_sheet = client.open("Digital Museum Streamlit Data Sheet").worksheet("Exhibition Summary")
-
-        success = True
-        if not df_views.empty:
-            success &= write_dataframe_to_sheets(views_sheet, df_views)
-        if not df_summary.empty:
-            success &= write_dataframe_to_sheets(summary_sheet, df_summary)
-
-        if success:
-            st.session_state.written_to_sheets = True
-
-    except Exception as e:
-        st.error(f"❌ Failed to write data to Google Sheets: {e}")
 
 # --- Downloads if Exhibition Was Created ---
 if "curated_exhibition" in st.session_state:
