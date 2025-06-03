@@ -175,12 +175,12 @@ def initialize_session_state():
 initialize_session_state()
 
 st.markdown("""
-    ### 🎨 Welcome to the Digital Museum Experience
+    ### Digital Museum
 
     You'll view 20 artworks, each with a short description.  
     At the end, you are invited to curate your own mini-exhibition (optional) and then complete a short final questionnaire.
 
-    👉 **Note**: We recommend completing this in one sitting, in a quiet place where you can stay focused. Please don’t refresh or go back, as your progress may be lost.
+     **Note**: We recommend completing this in one sitting, in a quiet place where you can stay focused. Please don’t refresh or go back, as your progress may be lost.
     """)
 
 # --- Ask for User Code to Identify Later ---
