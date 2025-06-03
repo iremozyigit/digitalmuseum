@@ -92,7 +92,6 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
         st.error(f"DataFrame shape: {df.shape}")
         st.error(f"DataFrame columns: {list(df.columns)}")
         return False
-        
 # --- Load Data ---
 @st.cache_data
 def load_museum_data():
@@ -166,8 +165,7 @@ def initialize_session_state():
         "exhibition_stage": "select_artworks",
         "written_to_sheets": False,
         "user_code": "",
-        "group": None,
-        "app_stage": "welcome"  # New stage tracker
+        "group": None
     }
     
     for key, value in defaults.items():
@@ -175,6 +173,33 @@ def initialize_session_state():
             st.session_state[key] = value
 
 initialize_session_state()
+
+
+
+# --- Ask for User Code to Identify Later ---
+prev_code = st.session_state.user_code
+st.session_state.user_code = st.text_input("Enter your 4-letter participant code:", value=prev_code)
+
+if st.session_state.user_code and len(st.session_state.user_code) != 4:
+    st.warning("Please enter a 4-letter participant code.")
+
+# Only show instructions and user code input if user hasn't started yet
+if not st.session_state.user_code or len(st.session_state.user_code) != 4:
+    st.markdown("""
+        ### ᭪ Digital Museum Tool 𓍯𓂃
+
+        You'll view 20 artworks, each with a short description.  
+        At the end, you are invited to curate your own mini-exhibition (optional) and then complete a short final questionnaire.
+
+         **Note**: We recommend completing this in one sitting, in a quiet place where you can stay focused. Please don't refresh or go back, as your progress may be lost.
+        """)
+    
+
+# --- Assign group deterministically ---
+if st.session_state.user_code and not st.session_state.group:
+    hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
+    group_value = int(hash_digest, 16) % 2
+    st.session_state.group = "ai" if group_value == 0 else "curator"
 
 # --- PDF Generation Function ---
 def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
@@ -274,41 +299,8 @@ def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
     return buffer
 
 # --- Main App Logic ---
-
-# WELCOME STAGE - User enters code and sees instructions
-if st.session_state.app_stage == "welcome":
-    st.markdown("""
-        ### ᭪ Digital Museum Tool 𓍯𓂃
-
-        You'll view 20 artworks, each with a short description.  
-        At the end, you are invited to curate your own mini-exhibition (optional) and then complete a short final questionnaire.
-
-         **Note**: We recommend completing this in one sitting, in a quiet place where you can stay focused. Please don't refresh or go back, as your progress may be lost.
-        """)
+if st.session_state.user_code and len(st.session_state.user_code) == 4:
     
-    # User code input
-    user_code_input = st.text_input("Enter your 4-letter participant code:")
-    
-    if user_code_input:
-        if len(user_code_input) == 4:
-            st.session_state.user_code = user_code_input
-            
-            # Assign group deterministically
-            hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
-            group_value = int(hash_digest, 16) % 2
-            st.session_state.group = "ai" if group_value == 0 else "curator"
-            
-            # Show start button
-            if st.button("Start Viewing Artworks", type="primary"):
-                st.session_state.app_stage = "viewing_artworks"
-                st.rerun()
-        else:
-            st.warning("Please enter exactly 4 letters.")
-
-# VIEWING ARTWORKS STAGE
-elif st.session_state.app_stage == "viewing_artworks":
-    # Display user info at the top (small and unobtrusive)
-    st.caption(f"Participant: {st.session_state.user_code} | Group: {st.session_state.group}")
     
     if st.session_state.index < len(st.session_state.selected_indices):
         artwork = data.iloc[st.session_state.selected_indices[st.session_state.index]]
@@ -335,183 +327,176 @@ elif st.session_state.app_stage == "viewing_artworks":
             })
 
             st.session_state.index += 1
-            if st.session_state.index >= len(st.session_state.selected_indices):
-                st.session_state.app_stage = "curator_mode"
             st.rerun()
 
-# CURATOR MODE STAGE
-elif st.session_state.app_stage == "curator_mode":
-    # Display user info at the top (small and unobtrusive)
-    st.caption(f"Participant: {st.session_state.user_code} | Group: {st.session_state.group}")
-    
-    st.markdown("---")
-    st.subheader("Curator Mode: Build Your Own Exhibition")
+    else:
+        st.markdown("---")
+        st.subheader("Curator Mode: Build Your Own Exhibition")
 
-    proceed = st.radio(
-        "Choose an option:",
-        ["Yes, I want to build an exhibition", "No, I want to skip this step"],
-        key="curator_choice"
-    )
+        proceed = st.radio(
+            "Choose an option:",
+            ["Yes, I want to build an exhibition", "No, I want to skip this step"],
+            key="curator_choice"
+        )
 
-    if proceed == "Yes, I want to build an exhibition":
-        viewed_df = pd.DataFrame(st.session_state.viewed_items)
-        selected_titles = []
+        if proceed == "Yes, I want to build an exhibition":
+            viewed_df = pd.DataFrame(st.session_state.viewed_items)
+            selected_titles = []
 
-        if st.session_state.exhibition_stage == "select_artworks":
-            st.markdown("#### Select artworks to include in your exhibition:")
-            col_left, col_right = st.columns(2)
-            for i, row in enumerate(viewed_df.itertuples()):
-                col = col_left if i % 2 == 0 else col_right
-                with col:
-                    st.markdown("**Select**")
-                    if st.checkbox("select", key=f"select_{row.artwork_id}_{i}", label_visibility="collapsed"):
-                        selected_titles.append(row.artwork_id)
-                    st.image(data[data['id'] == row.artwork_id].iloc[0]['image_url'], width=160)
-                    st.caption(row.title)
+            if st.session_state.exhibition_stage == "select_artworks":
+                st.markdown("#### Select artworks to include in your exhibition:")
+                col_left, col_right = st.columns(2)
+                for i, row in enumerate(viewed_df.itertuples()):
+                    col = col_left if i % 2 == 0 else col_right
+                    with col:
+                        st.markdown("**Select**")
+                        if st.checkbox("select", key=f"select_{row.artwork_id}_{i}", label_visibility="collapsed"):
+                            selected_titles.append(row.artwork_id)
+                        st.image(data[data['id'] == row.artwork_id].iloc[0]['image_url'], width=160)
+                        st.caption(row.title)
 
-            if st.button("Save My Exhibition and Pick Descriptions for Artworks", key="save_exhibition"):
-                if not selected_titles:
-                    st.error("Please select at least 1 artwork to proceed.")
-                else:
-                    st.session_state.exhibition_stage = "pick_descriptions"
-                    st.session_state.selected_titles = selected_titles
-                    st.rerun()
+                if st.button("Save My Exhibition and Pick Descriptions for Artworks", key="save_exhibition"):
+                    if not selected_titles:
+                        st.error("Please select at least 1 artwork to proceed.")
+                    else:
+                        st.session_state.exhibition_stage = "pick_descriptions"
+                        st.session_state.selected_titles = selected_titles
+                        st.rerun()
 
-        elif st.session_state.exhibition_stage == "pick_descriptions":
-            selected_titles = st.session_state.selected_titles
-            st.success("Artworks selected. Now select which description you'd include for each artwork.")
-            for artwork_id in selected_titles:
-                artwork_row = data[data['id'] == artwork_id].iloc[0]
-                title = artwork_row['title']
-                image_url = artwork_row['image_url']
-                curator_desc = artwork_row['description'] or "No curator description available."
-                ai_desc = artwork_row['ai_story'] or "No AI-generated description available."
+            elif st.session_state.exhibition_stage == "pick_descriptions":
+                selected_titles = st.session_state.selected_titles
+                st.success("Artworks selected. Now select which description you'd include for each artwork.")
+                for artwork_id in selected_titles:
+                    artwork_row = data[data['id'] == artwork_id].iloc[0]
+                    title = artwork_row['title']
+                    image_url = artwork_row['image_url']
+                    curator_desc = artwork_row['description'] or "No curator description available."
+                    ai_desc = artwork_row['ai_story'] or "No AI-generated description available."
 
-                desc_key = f"description_order_{artwork_id}"
-                if desc_key not in st.session_state:
-                    descriptions = [("A", curator_desc, "curator"), ("B", ai_desc, "ai")]
-                    random.shuffle(descriptions)
-                    st.session_state[desc_key] = descriptions
-                else:
-                    descriptions = st.session_state[desc_key]
+                    desc_key = f"description_order_{artwork_id}"
+                    if desc_key not in st.session_state:
+                        descriptions = [("A", curator_desc, "curator"), ("B", ai_desc, "ai")]
+                        random.shuffle(descriptions)
+                        st.session_state[desc_key] = descriptions
+                    else:
+                        descriptions = st.session_state[desc_key]
 
-                st.markdown(f"### {title}")
-                st.image(image_url, width=400)
-                col1, col2 = st.columns(2)
-                with col1:
-                    st.markdown("**Description A**")
-                    st.write(descriptions[0][1])
-                with col2:
-                    st.markdown("**Description B**")
-                    st.write(descriptions[1][1])
+                    st.markdown(f"### {title}")
+                    st.image(image_url, width=400)
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown("**Description A**")
+                        st.write(descriptions[0][1])
+                    with col2:
+                        st.markdown("**Description B**")
+                        st.write(descriptions[1][1])
 
-                choice = st.radio(
-                    f"Which description would you include for '{title}'?",
-                    ["Description A", "Description B"],
-                    key=f"preference_{artwork_id}"
-                )
+                    choice = st.radio(
+                        f"Which description would you include for '{title}'?",
+                        ["Description A", "Description B"],
+                        key=f"preference_{artwork_id}"
+                    )
 
-                st.session_state.preferences[artwork_id] = {
-                    "artwork_title": title,
-                    "user_choice": choice,
-                    "description_A_source": descriptions[0][2],
-                    "description_B_source": descriptions[1][2]
-                }
+                    st.session_state.preferences[artwork_id] = {
+                        "artwork_title": title,
+                        "user_choice": choice,
+                        "description_A_source": descriptions[0][2],
+                        "description_B_source": descriptions[1][2]
+                    }
+
+                st.markdown("---")
+                st.subheader("Finalize Your Exhibition")
+
+                st.session_state.exhibition_title = st.text_input("Give your exhibition a title:", value=st.session_state.exhibition_title, key="exhibition_title_input")
+                st.session_state.exhibition_description = st.text_area("Describe your theme in 1–2 sentences:", value=st.session_state.exhibition_description, key="exhibition_description_input")
+
+                if st.button("Save My Exhibition", key="finalize_exhibition"):
+                    if not st.session_state.exhibition_title or not st.session_state.exhibition_description:
+                        st.error("Please provide a title and description to save your exhibition.")
+                    else:
+                        st.session_state.curated_exhibition = {
+                            "selected_ids": selected_titles,
+                            "exhibition_title": st.session_state.exhibition_title,
+                            "exhibition_description": st.session_state.exhibition_description,
+                            "preferences": st.session_state.preferences
+                        }
+                        st.success("Your exhibition has been saved!")
+
+                        # Write data to Google Sheets immediately
+                        if client and not st.session_state.written_to_sheets:
+                            write_data_to_sheets()
+
+                        st.markdown("---")
+                        st.title("Thank you for participating!")
+                        st.write("You have completed the session.")
+                        st.write("Please continue to the final survey here:")
+                        st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
+
+        else:
+            st.info("You chose to skip Curator Mode.")
+            
+            # Write data to Google Sheets even if skipping
+            if client and not st.session_state.written_to_sheets:
+                write_data_to_sheets()
 
             st.markdown("---")
-            st.subheader("Finalize Your Exhibition")
+            st.title("Thank you for participating!")
+            st.write("You have completed the session.")
+            st.write("Please continue to the final survey here:")
+            st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
 
-            st.session_state.exhibition_title = st.text_input("Give your exhibition a title:", value=st.session_state.exhibition_title, key="exhibition_title_input")
-            st.session_state.exhibition_description = st.text_area("Describe your theme in 1–2 sentences:", value=st.session_state.exhibition_description, key="exhibition_description_input")
+# --- Downloads if Exhibition Was Created ---
+if "curated_exhibition" in st.session_state:
+    exhibition = st.session_state.curated_exhibition
 
-            if st.button("Save My Exhibition", key="finalize_exhibition"):
-                if not st.session_state.exhibition_title or not st.session_state.exhibition_description:
-                    st.error("Please provide a title and description to save your exhibition.")
-                else:
-                    st.session_state.curated_exhibition = {
-                        "selected_ids": selected_titles,
-                        "exhibition_title": st.session_state.exhibition_title,
-                        "exhibition_description": st.session_state.exhibition_description,
-                        "preferences": st.session_state.preferences
-                    }
-                    st.success("Your exhibition has been saved!")
-
-                    # Write data to Google Sheets immediately
-                    if client and not st.session_state.written_to_sheets:
-                        write_data_to_sheets()
-
-                    st.session_state.app_stage = "completion"
-                    st.rerun()
-
-    else:
-        st.info("You chose to skip Curator Mode.")
-        
-        # Write data to Google Sheets even if skipping
-        if client and not st.session_state.written_to_sheets:
-            write_data_to_sheets()
-
-        st.session_state.app_stage = "completion"
-        st.rerun()
-
-# COMPLETION STAGE
-elif st.session_state.app_stage == "completion":
-    # Display user info at the top (small and unobtrusive)
-    st.caption(f"Participant: {st.session_state.user_code} | Group: {st.session_state.group}")
-    
     st.markdown("---")
-    st.title("Thank you for participating!")
-    st.write("You have completed the session.")
-    st.write("Please continue to the final survey here:")
-    st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
-
-    # --- Downloads if Exhibition Was Created ---
-    if "curated_exhibition" in st.session_state:
-        exhibition = st.session_state.curated_exhibition
-
-        st.markdown("---")
-        st.subheader("Download Your Exhibition Card (PDF)")
-        
-        try:
-            pdf_buffer = generate_exhibition_pdf(
-                title=exhibition['exhibition_title'],
-                description=exhibition['exhibition_description'],
-                artwork_ids=exhibition['selected_ids'],
-                data=data,
-                preferences=exhibition['preferences']
-            )
-
-            st.download_button(
-                label="Download Exhibition Card (PDF)",
-                data=pdf_buffer,
-                file_name="my_exhibition_card.pdf",
-                mime="application/pdf"
-            )
-        except Exception as e:
-            st.error(f"Error generating PDF: {e}")
-
-        # CSV downloads
-        df_views = pd.DataFrame(st.session_state.viewed_items)
-        if not df_views.empty:
-            df_views["user_code"] = st.session_state.user_code
-            df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
-            
-            st.download_button(
-                label="Download Artwork Views (CSV)",
-                data=df_views.to_csv(index=False).encode('utf-8'),
-                file_name="artwork_views.csv",
-                mime="text/csv"
-            )
-
-        df_summary = pd.DataFrame([{
-            "exhibition_title": exhibition.get("exhibition_title", ""),
-            "exhibition_description": exhibition.get("exhibition_description", ""),
-            "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
-            "preferences": json.dumps(exhibition.get("preferences", {}), indent=2)
-        }])
+    st.subheader("Download Your Exhibition Card (PDF)")
+    
+    try:
+        pdf_buffer = generate_exhibition_pdf(
+            title=exhibition['exhibition_title'],
+            description=exhibition['exhibition_description'],
+            artwork_ids=exhibition['selected_ids'],
+            data=data,
+            preferences=exhibition['preferences']
+        )
 
         st.download_button(
-            label="Download Exhibition Summary (CSV)",
-            data=df_summary.to_csv(index=False).encode('utf-8'),
-            file_name="exhibition_summary.csv",
+            label="Download Exhibition Card (PDF)",
+            data=pdf_buffer,
+            file_name="my_exhibition_card.pdf",
+            mime="application/pdf"
+        )
+    except Exception as e:
+        st.error(f"Error generating PDF: {e}")
+
+    # CSV downloads
+    df_views = pd.DataFrame(st.session_state.viewed_items)
+    if not df_views.empty:
+        df_views["user_code"] = st.session_state.user_code
+        df_views["timestamp"] = time.strftime("%Y-%m-%d %H:%M:%S")
+        
+        st.download_button(
+            label="Download Artwork Views (CSV)",
+            data=df_views.to_csv(index=False).encode('utf-8'),
+            file_name="artwork_views.csv",
             mime="text/csv"
         )
+
+    df_summary = pd.DataFrame([{
+        "exhibition_title": exhibition.get("exhibition_title", ""),
+        "exhibition_description": exhibition.get("exhibition_description", ""),
+        "selected_ids": ", ".join(exhibition.get("selected_ids", [])),
+        "preferences": json.dumps(exhibition.get("preferences", {}), indent=2)
+    }])
+
+    st.download_button(
+        label="Download Exhibition Summary (CSV)",
+        data=df_summary.to_csv(index=False).encode('utf-8'),
+        file_name="exhibition_summary.csv",
+        mime="text/csv"
+    )
+
+# --- Show user code prompt if not provided ---
+if not st.session_state.user_code or len(st.session_state.user_code) != 4:
+    st.write("Please enter your 4-letter participant code to continue.")
