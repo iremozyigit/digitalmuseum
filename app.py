@@ -427,9 +427,9 @@ if st.session_state.user_code and len(st.session_state.user_code) == 4:
                             write_data_to_sheets()
 
                         st.markdown("---")
-                        st.title("Thank you for participating!")
-                        st.write("You have completed the session.")
-                        st.write("Please continue to the final survey here:")
+                        st.title("You have completed the session. Please continue to the final step here" ")
+                        
+                        
                         st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
 
         else:
