@@ -19,6 +19,17 @@
         "description":"This is a panoramic, sun-drenched river landscape \u2013 somewhat hazy in the distance \u2013 with sketchily drawn clouds. Two Dutch officers halt at the river, and water their horses next to a herder and his resting cattle. This idyllic scene does not unfold in Italy, but along the Waal between Nijmegen and Cleves, where Cuyp made landscape drawings that he took back to his workshop in Dordrecht.",
         "ai_story":"Aelbert Cuyp's \"River Landscape with Riders\" presents a serene tableau where human and nature coexist harmoniously. The riders, absorbed in their journey, traverse a tranquil riverside, reflecting the 17th-century Dutch fascination with pastoral life and the natural world. Cuyp's masterful use of light and shadow creates depth, drawing attention to the expansive sky and distant hills, which evoke a sense of peace and continuity. This work subtly underscores the era's appreciation for the beauty and tranquility of rural landscapes, inviting contemplation of humanity's place within the natural order."
     },
+     {
+        "id":"SK-A-133",
+        "title":"Portrait of a Married Couple, Likely Isaac Abrahamsz Massa and Beatrix van der Laen",
+        "artist":"Frans Hals",
+        "longTitle":"Portrait of a Married Couple, Likely Isaac Abrahamsz Massa and Beatrix van der Laen, Frans Hals, c. 1622",
+        "image_url":"https:\/\/lh3.googleusercontent.com\/yfH3HoYjUOOXNic6f9V3KSgtFGQYxU3lyqsi08F7P8GVHW12saX8oW_sApbSTgTBv-ctXUqCLM82FgHzUamP9Z-ozhCJZKZkb2U3F13z=s0",
+        "theme":"landscape",
+        "description":"It was rare for a married couple to be portrayed lifesize and together in a single painting, and even more so in such an intimate and joyful manner. The patron would have had to have been receptive to such innovation. The close friendship between Hals and the newlywed couple, presumably Isaac Abrahamsz Massa and Beatrix van der Laen, likely played a crucial role in facilitating the creation of this audacious portrait.",
+        "ai_story":"Frans Hals presents a vivid portrayal of companionship and status through the relaxed yet poised demeanor of the couple. The lush landscape backdrop, with its classical elements, subtly underscores themes of harmony and prosperity. Hals\u2019s mastery in capturing the lively expressions and intricate details of attire reflects the couple's social standing and personal connection. The painting invites contemplation of the interplay between individual identity and the broader cultural milieu of the Dutch Golden Age."
+    },
+    
     {
         "id":"BK-17496",
         "title":"Blue Parrot",
@@ -28,16 +39,6 @@
         "theme":"animals",
         "description":"This parrot perches momentarily on a tree stump. It clutches a twig with cherries. The parrot is the same size as a real one, but ten times heavier. It is made entirely of porcelain. Porcelain is very hard fired clay and extremely difficult to make. It was even called \u2018white gold.\u2019 The maker deliberately didn\u2019t colour the parrot all over. This way you can see the porcelain clearly.",
         "ai_story":"Perched with an air of regal elegance, the \"Blue Parrot\" by Meissener Porzellan Manufaktur reflects the 18th-century fascination with exoticism and nature\u2019s vivid palette. Crafted with meticulous attention to detail, this porcelain figure captures the intricate textures of feathers and the parrot's poised demeanor. Such works were often symbols of wealth and status, embodying the era's appreciation for both artistry and the natural world. The vibrant hues and lifelike posture invite contemplation of humanity\u2019s enduring desire to capture and possess the beauty of the natural realm."
-    },
-    {
-        "id":"SK-A-175",
-        "title":"A Pelican and other Birds near a Pool, Known as \u2018The Floating Feather\u2019",
-        "artist":"Melchior d'Hondecoeter",
-        "longTitle":"A Pelican and other Birds near a Pool, Known as \u2018The Floating Feather\u2019, Melchior d'Hondecoeter, c. 1680",
-        "image_url":"https:\/\/lh3.googleusercontent.com\/3UIOtn2DLhEC4W92V0_pIdChloiYyzpXvehK0BYaM3NHJR5zWhcA7uXlcNX_mCAt9xBh3gaHo3pDuriYzYm3uEDbeUEr=s0",
-        "theme":"animals",
-        "description":"It must have been a great honour for Hondecoeter to receive commissions from the country\u2019s ruler. He made this regal bird scene for Het Loo, the palace of William and Mary. It features a pelican in the foreground, a cassowary behind it at the left, a flamingo and a black crowned crane. Water birds congregate in and around a basin, and a feather floats on the water\u2019s surface.",
-        "ai_story":"A serene gathering unfolds as a diverse assembly of birds congregates by a tranquil pool, each species rendered with meticulous attention to detail. Melchior d'Hondecoeter, renowned for his mastery in depicting avian life, orchestrates a scene that reflects both the harmony and diversity of nature. The pelican, central and majestic, commands attention, while the delicate interplay of light and shadow evokes a sense of calm and timelessness. This composition not only showcases the artist's technical skill but also invites contemplation on the interconnectedness of the natural world."
     },
     {
         "id":"BK-1963-64",
@@ -88,16 +89,6 @@
         "theme":"history",
         "description":"This room was built and furnished for Willem Philip Kops, a merchant and art collector, as an addition to his house at 74 Nieuwe Gracht in Haarlem. With the exception of the original stucco ceiling, the room survives virtually intact. Abraham van der Hart, the city architect of Amsterdam, succeeded in creating a harmonious, classicizing entity, in which all the arts are in tune with one another. He must have been assisted by a specialized firm of upholsterers, which ordered the furnishings and coordinated the installation. The chimneypiece probably came from Italy, the carpet from the Flemish city of Tournai, the furniture from Amsterdam, the silk hangings and upholstery from Lyon in France and the glass chandelier and candelabra from England. The room was most likely used only for formal evening receptions.",
         "ai_story":"In the Haarlem reception room, Abraham van der Hart crafts a space where the elegance of late 18th-century Dutch society unfolds. The intricate detailing and harmonious color palette reflect the period\u2019s affinity for refined opulence and symmetry. This room, with its grand chandelier and ornate moldings, serves as a testament to the cultural exchange between the Netherlands and France, evident in the neoclassical influences. Through its design, the room encapsulates a moment in history when architecture was not just functional but a statement of status and taste."
-    },
-    {
-        "id":"SK-A-4100",
-        "title":"The Art Gallery of Jan Gildemeester Jansz",
-        "artist":"Adriaan de Lelie",
-        "longTitle":"The Art Gallery of Jan Gildemeester Jansz, Adriaan de Lelie, 1794 - 1795",
-        "image_url":"https:\/\/lh3.googleusercontent.com\/vkoS9jmZLZWuWH1LNIG3eJUVI6W7XqOUKmFf_lcuB4m1nJydWPXZGggi3XGwmirNj1wLdiO7sH6x5fJ60XJnH2expg=s0",
-        "theme":"history",
-        "description":"In 1792, the merchant Gildemeester converted two large rooms in his house on Amsterdam\u2019s Herengracht into a picture gallery. Here we see that the walls are densely hung with paintings in gilded frames. Gildemeester stands in the middle of the front room, conversing with one of his guests. The visitors are studying the famous works, including a Rembrandt, visible above Gildemeester\u2019s head.",
-        "ai_story":"In the bustling scene of Jan Gildemeester Jansz's art gallery, Adriaan de Lelie offers a glimpse into the cultural vibrancy of late 18th-century Amsterdam. This gathering of art enthusiasts, engaged in lively discussion and contemplation, reflects the era's burgeoning appreciation for art as a communal experience. The detailed depiction of both the paintings and the observers suggests a dialogue between art and viewer, highlighting the role of galleries as spaces for intellectual exchange. De Lelie\u2019s composition invites reflection on the social dynamics of art appreciation during this period, where personal and collective identities were shaped amidst the backdrop of artistic expression."
     },
     {
         "id":"BK-17040-A",
