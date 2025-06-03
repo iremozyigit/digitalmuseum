@@ -181,14 +181,15 @@ st.session_state.user_code = st.text_input("Enter your 4-letter participant code
 if st.session_state.user_code and len(st.session_state.user_code) != 4:
     st.warning("Please enter a 4-letter participant code.")
 
+if st.session_state.user_code and len(st.session_state.user_code) == 4:
     st.markdown("""
-### 🎨 Welcome to the Digital Museum Experience
+    ### 🎨 Welcome to the Digital Museum Experience
 
-You'll view 20 artworks, each with a short description.  
-At the end, you are invited to curate your own mini-exhibition (optional) and then complete a short final questionnaire.
+    You'll view 20 artworks, each with a short description.  
+    At the end, you are invited to curate your own mini-exhibition (optional) and then complete a short final questionnaire.
 
-👉 **Note**: We recommend completing this in one sitting, in a quiet place where you can stay focused. Please don’t refresh or go back, as your progress may be lost.
-""")
+    👉 **Note**: We recommend completing this in one sitting, in a quiet place where you can stay focused. Please don’t refresh or go back, as your progress may be lost.
+    """)
 # --- Assign group deterministically ---
 if st.session_state.user_code and not st.session_state.group:
     hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
