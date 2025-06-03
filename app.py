@@ -355,6 +355,7 @@ if st.session_state.user_code and len(st.session_state.user_code) == 4:
                 for artwork_id in selected_titles:
                     artwork_row = data[data['id'] == artwork_id].iloc[0]
                     title = artwork_row['title']
+                    image_url = artwork_row['image_url']
                     curator_desc = artwork_row['description'] or "No curator description available."
                     ai_desc = artwork_row['ai_story'] or "No AI-generated description available."
 
