@@ -62,7 +62,7 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
             # Try to get all values first
             all_values = sheet.get_all_values()
             sheet_is_empty = len(all_values) == 0 or (len(all_values) == 1 and all(cell == '' for cell in all_values[0]))
-            st.info(f"Sheet has {len(all_values)} rows, is_empty: {sheet_is_empty}")
+            
         except Exception as e:
             # If get_all_values fails, assume sheet is empty
             st.warning(f"Could not check sheet contents, assuming empty: {e}")
@@ -71,11 +71,11 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
         # Add headers if sheet is empty
         if sheet_is_empty:
             headers = df.columns.tolist()
-            st.info(f"Adding headers: {headers}")
+            
             sheet.append_row(headers, value_input_option="USER_ENTERED")
         
         # Append data rows
-        st.info(f"Appending {len(rows)} data rows...")
+        
         for i, row in enumerate(rows):
             try:
                 sheet.append_row(row, value_input_option="USER_ENTERED")
