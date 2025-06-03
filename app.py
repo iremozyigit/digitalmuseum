@@ -175,7 +175,7 @@ def initialize_session_state():
 initialize_session_state()
 
 st.markdown("""
-    ### ᭪ Digital Museum Experience 𓍯𓂃
+    ### ᭪ Digital Museum Tool 𓍯𓂃
 
     You'll view 20 artworks, each with a short description.  
     At the end, you are invited to curate your own mini-exhibition (optional) and then complete a short final questionnaire.
