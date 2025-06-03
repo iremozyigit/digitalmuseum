@@ -9,16 +9,7 @@
         "description":"The high vantage point of this painting turns it into a sampler of human \u2013 and animal \u2013 activity during a harsh winter. Hundreds of people are out on the ice, most of them for pleasure, others working out of dire necessity. Avercamp did not shy away from grim details: in the left foreground crows and a dog feast on the carcass of a horse that has frozen to death.",
         "ai_story":"Amidst the muted tones of a winter's day, Avercamp depicts a lively scene of communal joy and activity on the frozen waterways. The painting captures the essence of 17th-century Dutch life, where the harshness of winter transforms into a social playground. Skaters of all ages and social standings mingle, reflecting a society where the boundaries of class momentarily dissolve. Avercamp\u2019s attention to detail invites viewers to explore the myriad of interactions and stories unfolding across the ice, offering a glimpse into the cultural fabric of the time."
     },
-    {
-        "id":"SK-A-4688",
-        "title":"Italian Landscape with Umbrella Pines",
-        "artist":"Hendrik Voogd",
-        "longTitle":"Italian Landscape with Umbrella Pines, Hendrik Voogd, 1807",
-        "image_url":"https:\/\/lh3.googleusercontent.com\/aqXgCqxvgXItt7Puc22OF8vbuuSGLiI8xUphPF3Jn_VWFBOcLwR96hBC4aRqAVxd_kGy6G-D2y8vRrTJOTbzcSMisc8=s0",
-        "theme":"landscape",
-        "description":"Voogd was known as the \u2018Dutch Claude\u2019, after the French painter Claude Lorrain, who was famous for his history landscapes bathed in golden light. Voogd painted the gardens of the Villa Borghese in Rome in the late afternoon. The sun casts long shadows, and the trees stand out sharply against the sky. Strolling figures are enjoying the magnificent sunset. In the foreground, an artist is seated against a tree and drawing.",
-        "ai_story":"Hendrik Voogd\u2019s depiction of an Italian landscape offers a serene glimpse into the harmonious interplay between nature and light. The towering umbrella pines serve as both a focal point and a natural frame, guiding the viewer\u2019s eye across the tranquil scene. Voogd captures the delicate balance of shadow and illumination, evoking a sense of timelessness and peace. This work reflects the Romantic era\u2019s fascination with the sublime beauty of nature, inviting contemplation of humanity\u2019s place within it."
-    },
+
     {
         "id":"SK-A-4118",
         "title":"River Landscape with Riders",
@@ -39,7 +30,16 @@
         "description":"It was rare for a married couple to be portrayed lifesize and together in a single painting, and even more so in such an intimate and joyful manner. The patron would have had to have been receptive to such innovation. The close friendship between Hals and the newlywed couple, presumably Isaac Abrahamsz Massa and Beatrix van der Laen, likely played a crucial role in facilitating the creation of this audacious portrait.",
         "ai_story":"Frans Hals presents a vivid portrayal of companionship and status through the relaxed yet poised demeanor of the couple. The lush landscape backdrop, with its classical elements, subtly underscores themes of harmony and prosperity. Hals\u2019s mastery in capturing the lively expressions and intricate details of attire reflects the couple's social standing and personal connection. The painting invites contemplation of the interplay between individual identity and the broader cultural milieu of the Dutch Golden Age."
     },
-    
+    {
+        "id":"SK-A-1505",
+        "title":"A Windmill on a Polder Waterway, Known as \u2018In the Month of July\u2019",
+        "artist":"Paul Joseph Constantin Gabri\u00ebl",
+        "longTitle":"A Windmill on a Polder Waterway, Known as \u2018In the Month of July\u2019, Paul Joseph Constantin Gabri\u00ebl, c. 1889",
+        "image_url":"https:\/\/lh3.googleusercontent.com\/nfJiRConmXf4QR1bK3-E456qIEp2bYtuemyy3P3t7PonntyGJ8iPzFNKJPhZFCSSmJmj2AHePE4V1xl3BOz2NT8mfbNg=s0",
+        "theme":"landscape",
+        "description":"\u2018Our country is saturated with colour. ... I repeat, our country is not grey, not even in grey weather, nor are the dunes grey\u2019, wrote Constant Gabri\u00ebl in a letter. Unlike many Hague School painters, he actually enjoyed depicting a beautiful summer day. There are even two of them in this painting: the image of the grass, sky and mill, and their reflection in the water.",
+        "ai_story":"Amidst the expansive Dutch landscape, Paul Joseph Constantin Gabri\u00ebl presents a tranquil scene where the windmill stands as a testament to human ingenuity harmonizing with nature. The reflection in the polder waterway blurs the line between reality and its mirrored image, inviting contemplation on the delicate balance between land and water. Gabri\u00ebl\u2019s attention to the vast sky, with its dynamic clouds, emphasizes the ever-changing weather patterns that define the region. This work subtly captures the essence of rural life and the enduring relationship between the Dutch people and their environment."
+    },
     {
         "id":"BK-17496",
         "title":"Blue Parrot",
