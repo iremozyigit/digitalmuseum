@@ -367,6 +367,7 @@ if st.session_state.user_code and len(st.session_state.user_code) == 4:
                         descriptions = st.session_state[desc_key]
 
                     st.markdown(f"### {title}")
+                    st.image(image_url, width=400)
                     col1, col2 = st.columns(2)
                     with col1:
                         st.markdown("**Description A**")
