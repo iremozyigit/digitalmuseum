@@ -18,7 +18,7 @@ from google.oauth2.service_account import Credentials
 import json
 import hashlib
 
-# --- Set up connection to Google Sheets ---
+# Set up connection to Google Sheets
 @st.cache_resource
 def init_google_sheets():
     """Initialize Google Sheets connection with caching"""
@@ -29,7 +29,7 @@ def init_google_sheets():
         client = gspread.authorize(credentials)
         return client
     except Exception as e:
-        st.error(f"❌ Failed to initialize Google Sheets: {e}")
+        st.error(f"Failed to initialize Google Sheets: {e}")
         return None
 
 # Initialize client
@@ -41,10 +41,10 @@ if client:
         test_sheet = client.open("Digital Museum Streamlit Data Sheet").sheet1
         
     except Exception as e:
-        st.error(f"❌ Failed to connect to Google Sheets: {e}")
+        st.error(f"Failed to connect to Google Sheets: {e}")
         client = None
 
-# --- Write to Google Sheets Function ---
+# Write to Google Sheets Function
 def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
     """Write DataFrame to Google Sheets with error handling"""
     try:
@@ -84,15 +84,15 @@ def write_dataframe_to_sheets(sheet, df: pd.DataFrame):
                 st.error(f"Row data: {row}")
                 raise
         
-        st.success("✅ Success.")
+        st.success("Success.")
         return True
         
     except Exception as e:
-        st.error(f"❌ Failed to write DataFrame to Google Sheets: {e}")
+        st.error(f"Failed to write DataFrame to Google Sheets: {e}")
         st.error(f"DataFrame shape: {df.shape}")
         st.error(f"DataFrame columns: {list(df.columns)}")
         return False
-# --- Load Data ---
+# Load Data
 @st.cache_data
 def load_museum_data():
     """Load museum data with caching"""
@@ -107,7 +107,7 @@ def load_museum_data():
 
 data = load_museum_data()
 
-# --- Data Writing Function ---
+# Data Writing Function 
 def write_data_to_sheets():
     """Write data to Google Sheets"""
     if not client:
@@ -149,9 +149,9 @@ def write_data_to_sheets():
             st.session_state.written_to_sheets = True
 
     except Exception as e:
-        st.error(f"❌ Failed to write data to Google Sheets: {e}")
+        st.error(f"Failed to write data to Google Sheets: {e}")
 
-# --- Setup Session State ---
+# Setup Session State 
 def initialize_session_state():
     """Initialize all session state variables"""
     defaults = {
@@ -176,7 +176,7 @@ initialize_session_state()
 
 
 
-# --- Ask for User Code to Identify Later ---
+# Ask for User Code to Identify Later
 prev_code = st.session_state.user_code
 st.session_state.user_code = st.text_input("Enter your 4-letter participant code:", value=prev_code)
 
@@ -195,13 +195,13 @@ if not st.session_state.user_code or len(st.session_state.user_code) != 4:
         """)
     
 
-# --- Assign group deterministically ---
+# Assign group deterministically
 if st.session_state.user_code and not st.session_state.group:
     hash_digest = hashlib.sha256(st.session_state.user_code.encode()).hexdigest()
     group_value = int(hash_digest, 16) % 2
     st.session_state.group = "ai" if group_value == 0 else "curator"
 
-# --- PDF Generation Function ---
+# PDF Generation Function
 def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
     """Generate PDF exhibition card"""
     import tempfile
@@ -298,7 +298,7 @@ def generate_exhibition_pdf(title, description, artwork_ids, data, preferences):
     buffer.seek(0)
     return buffer
 
-# --- Main App Logic ---
+# Main App Logic
 if st.session_state.user_code and len(st.session_state.user_code) == 4:
     
     
@@ -443,7 +443,7 @@ if st.session_state.user_code and len(st.session_state.user_code) == 4:
             st.write("Please continue to the final part here:")
             st.markdown("[Go to Survey](https://docs.google.com/forms/d/e/1FAIpQLSfMmbXk8-9qoEygXBqcBY2gAqiGrzDms48tcf0j_ax-px56pg/viewform?usp=header)")
 
-# --- Downloads if Exhibition Was Created ---
+# Downloads if Exhibition Was Created
 if "curated_exhibition" in st.session_state:
     exhibition = st.session_state.curated_exhibition
 
@@ -495,6 +495,6 @@ if "curated_exhibition" in st.session_state:
         mime="text/csv"
     )
 
-# --- Show user code prompt if not provided ---
+# Show user code prompt if not provided 
 if not st.session_state.user_code or len(st.session_state.user_code) != 4:
     st.write("Please enter your 4-letter participant code to continue.")
